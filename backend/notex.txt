@@ -1,0 +1,14 @@
+npm install express cookie-parser mailtrap bcryptjs dotenv jsonwebtoken mongoose crypto
+npm i nodemon -D
+add keywords in package.json {
+    "type": "module",
+}
+update the scrips in package.json {
+    type ki jgh dev ::::::::::::::::"dev": "nodemon backend/index.js"
+}
+and update {
+    "main": "backend/index.js",
+}
+mail send krrne ke liye run {
+    node .\backend\mailtrap\mailtrap.config.js
+}
