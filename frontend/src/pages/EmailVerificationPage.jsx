@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
@@ -43,7 +43,7 @@ const EmailVerificationPage = () => {
 		}
 	};
 
-	const handleSubmit = async (e) => {
+	const handleSubmit = useCallback(async (e) => {
 		e.preventDefault();
 		const verificationCode = code.join("");
 		try {
@@ -53,14 +53,14 @@ const EmailVerificationPage = () => {
 		} catch (error) {
 			console.log(error);
 		}
-	};
+	}, [code, verifyEmail, navigate]);
 
 	// Auto submit when all fields are filled
 	useEffect(() => {
 		if (code.every((digit) => digit !== "")) {
 			handleSubmit(new Event("submit"));
 		}
-	}, [code]);
+	}, [code,handleSubmit]);
 
 	return (
     <div className="flex items-center justify-center h-screen">
