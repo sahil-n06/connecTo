@@ -10,15 +10,8 @@ const AuthScreen = () => {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        // Fetch the token from localStorage (or use any state management system you're using)
-        const token = localStorage.getItem("token");
-
         // Call backend to fetch user role
-        const response = await axios.get("/api/auth/getRole", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get("/api/auth/getRole");
 
         // Set the role from the response
         setRole(response.data.role);
