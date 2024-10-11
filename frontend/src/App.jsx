@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import SignupPage from "/src/pages/SignupPage.jsx";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/home/HomePage";
@@ -13,13 +13,14 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import RoleBasedRoute from "./components/RoleBasedRoute";
 import RedirectAuthenticatedUser from "./components/RedirectAuthenticatedUser";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ChatPage from "./pages/ChatPage";
 
 
 
 
 function App() {
   const { isCheckingAuth, checkAuth } = useAuthStore();
-
+  const { user } = useAuthStore();
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -82,8 +83,10 @@ function App() {
 						</RedirectAuthenticatedUser>
 					}
 				/>
+        <Route path='/chat' element={user ? <ChatPage /> : <Navigate to={"/login"} />} />
       </Routes>
       <Toaster />
+
     </div>
   );
 }
