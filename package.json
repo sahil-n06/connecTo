@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
+    "daisyui": "^4.12.13",
     "nodemon": "^3.1.4"
   }
 }
