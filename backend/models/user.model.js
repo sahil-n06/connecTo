@@ -19,6 +19,15 @@ const userSchema = new mongoose.Schema({
         enum:['mentor','mentee'],
         required:true
     },
+    gender:{
+        type: String,
+        enum:['male', 'female'],
+        required: true
+    },
+    profilePhoto:{
+        type: String,
+        default: ''
+    },
     lastLogin: {
         type: Date,
         default: Date.now
