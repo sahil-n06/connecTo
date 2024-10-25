@@ -11,6 +11,7 @@ const SignUpPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
+  const [gender, setGender] = useState(""); // Gender state added
   const navigate = useNavigate();
 
   const { signup, error, isLoading } = useAuthStore();
@@ -19,7 +20,7 @@ const SignUpPage = () => {
     e.preventDefault();
 
     try {
-      await signup(email, password, name, role);
+      await signup(email, password, name, role, gender); // Added gender to the signup call
       navigate("/verify-email");
     } catch (error) {
       console.log(error);
@@ -27,9 +28,7 @@ const SignUpPage = () => {
   };
 
   return (
-    <>
-    
-    <div className="flex items-center justify-center h-screen"> {/* Centering the form */}
+    <div className="flex items-center justify-center h-screen">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,7 +41,7 @@ const SignUpPage = () => {
           </h2>
 
           <form onSubmit={handleSignUp}>
-           <Input
+            <Input
               icon={User}
               type="text"
               placeholder="Full Name"
@@ -68,9 +67,19 @@ const SignUpPage = () => {
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="form-select block w-full mt-1 p-2 bg-gray-600 text-white border border-gray-700 rounded-md">
-              <option value="" disabled>Select your role</option> {/* Placeholder */}
+              <option value="" disabled>Select your role</option>
               <option value="mentor">Mentor</option>
               <option value="mentee">Mentee</option>
+            </select>
+            <select
+              name="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)} // Gender selection
+              className="form-select block w-full mt-4 p-2 bg-gray-600 text-white border border-gray-700 rounded-md"
+            >
+              <option value="" disabled>Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
             </select>
             {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
             <PasswordStrengthMeter password={password} />
@@ -96,7 +105,6 @@ const SignUpPage = () => {
         </div>
       </motion.div>
     </div>
-    </>
   );
 };
 

@@ -10,14 +10,22 @@ import {
 } from "../mailtrap/email.js";
 
 export const signup = async (req, res) => {
-    const { email, password, name, role } = req.body;
-    console.log({ email: email, password: password, name: name, role: role});
+    const { email, password, name, role, gender } = req.body;
+    console.log({ email, password, name, role, gender });
+
     try {
-        if (!email || !password || !name || !role) {
+        // Validate all required fields
+        if (!email || !password || !name || !role || !gender) {
             throw new Error("All fields are required");
         }
-        
 
+        // Normalize gender input
+        const normalizedGender = gender.toLowerCase();
+        if (!['male', 'female'].includes(normalizedGender)) {
+            throw new Error("Gender must be either 'male' or 'female'");
+        }
+
+        // Check for existing user
         const userAlreadyExists = await User.findOne({ email });
         console.log("userAlreadyExists", userAlreadyExists);
 
@@ -25,38 +33,53 @@ export const signup = async (req, res) => {
             return res.status(400).json({ success: false, message: "User already exists" });
         }
 
+        // Hash password
         const hashedPassword = await bcryptjs.hash(password, 10);
         const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
+        // Ensure correct usage of normalized gender
+        const profilePhoto = normalizedGender === 'male' 
+            ? `https://avatar.iran.liara.run/public/boy?name=${name}` 
+            : `https://avatar.iran.liara.run/public/girl?name=${name}`;
+
+        // Create new user instance
         const user = new User({
             email,
             password: hashedPassword,
             name,
             role,
+            gender: normalizedGender,
+            profilePhoto, // Assign profile photo
             verificationToken,
             verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24hrs
         });
 
+        // Save user to database
         await user.save();
 
+        // Generate token and set cookie
         generateTokenAndSetCookie(res, user._id);
 
+        // Send verification email
         await sendVerificationEmail(user.email, verificationToken);
 
-
+        // Respond with success
         res.status(201).json({ 
             success: true, 
             message: "User registered successfully",
             user: {
                 ...user._doc,
-                password: undefined, // Remove the password from the returned user object
+                password: undefined, // Remove password from response
             } 
         });
 
     } catch (error) {
+        console.error("Signup error:", error);
         return res.status(400).json({ success: false, message: error.message });
     }
 };
+
+
 
 export const verifyEmail =async (req, res) => {
     const {code} = req.body;
@@ -211,4 +234,16 @@ export const getUserRole = async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
   };
+
+  export const getOtherUsers = async (req,res)=>{
+    try{
+        const loggedInUserId = req.userId;
+        const otherUsers = await User.find({_id: {$ne: loggedInUserId}}).select("-password");
+        return res.status(200).json(otherUsers);
+
+    }catch (error) {
+        console.error("Error in getOtherUsers:", error);
+    }
+  };
+   
   
