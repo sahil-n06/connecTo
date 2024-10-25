@@ -16,7 +16,7 @@ const HomePage = () => {
     <>
       <header className='max-w-6xl mx-auto flex items-center justify-between p-4 pb-10'>
         {/* Your logo here */}
-        <img src='' alt='Logo' className='w-32 md:w-52' />
+        <img src='/logo.png' alt='Logo' className='w-32 md:w-52' />
 
         {/* Flex container for Sign In/Logout button and Dark/Light mode toggle */}
         <Flex alignItems="center" justifyContent="flex-end" gap={4}>
