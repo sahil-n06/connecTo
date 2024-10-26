@@ -55,16 +55,13 @@ export const signup = async (req, res) => {
         // Save user to database
         await user.save();
 
-        // Generate token and set cookie
-        generateTokenAndSetCookie(res, user._id);
-
         // Send verification email
         await sendVerificationEmail(user.email, verificationToken);
 
-        // Respond with success
+        // Respond with success without generating token
         res.status(201).json({ 
             success: true, 
-            message: "User registered successfully",
+            message: "User registered successfully. Please verify your email.",
             user: {
                 ...user._doc,
                 password: undefined, // Remove password from response
@@ -79,38 +76,43 @@ export const signup = async (req, res) => {
 
 
 
-export const verifyEmail =async (req, res) => {
-    const {code} = req.body;
-    try{
+
+export const verifyEmail = async (req, res) => {
+    const { code } = req.body;
+    try {
         const user = await User.findOne({
             verificationToken: code,
             verificationTokenExpiresAt: { $gt: Date.now() }
-        })
-     
-        if(user==null || user == undefined){
+        });
+
+        if (!user) {
             return res.status(400).json({ success: false, message: "Invalid or expired verification code" });
         }
+
         user.isVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpiresAt = undefined;
-        await user.save();  
-        
-        await sendWelcomeEmail(user.email,user.name);
+        await user.save();
+
+        // Generate token and set cookie after verification
+        generateTokenAndSetCookie(res, user._id);
+
+        await sendWelcomeEmail(user.email, user.name);
 
         res.status(200).json({ 
             success: true, 
             message: "Email verified successfully",
-            user:{
+            user: {
                 ...user._doc,
-                password:undefined,
+                password: undefined,
             } 
         });
-    }catch (error) {
+    } catch (error) {
         console.error("Error verifying email:", error);
         return res.status(500).json({ success: false, message: "Something went wrong. Please try again later." });
- 
-    };
+    }
 };
+
 
 export const login = async (req, res) => {
     const { email, password } = req.body;
@@ -130,6 +132,7 @@ export const login = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid credentials" });
         }
 
+        // Generate token after verification
         generateTokenAndSetCookie(res, user._id);
         user.lastLogin = new Date();
         await user.save();
@@ -142,6 +145,7 @@ export const login = async (req, res) => {
                 password: undefined,
             },
         });
+
     } catch (error) {
         console.error("Error logging in:", error);
         res.status(400).json({ success: false, message: "Something went wrong. Please try again later." });
