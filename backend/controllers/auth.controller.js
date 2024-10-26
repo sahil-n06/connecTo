@@ -113,35 +113,41 @@ export const verifyEmail =async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    const {email, password} =req.body;
-    try{
-        const user = await User.findOne({email});
-        if(!user){
-            return res.status(400).json({ success: false, message: "User not found or not verified"});
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "User not found" });
         }
-        const isPasswordValid= await bcryptjs.compare(password, user.password);
-        if(!isPasswordValid){
-            return res.status(400).json({ success: false, message: "Invalid credentials"});
+
+        // Check if user is verified
+        if (!user.isVerified) {
+            return res.status(403).json({ success: false, message: "Please verify your email before logging in." });
         }
+
+        const isPasswordValid = await bcryptjs.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ success: false, message: "Invalid credentials" });
+        }
+
         generateTokenAndSetCookie(res, user._id);
-        user.lastLogin=new Date();
+        user.lastLogin = new Date();
         await user.save();
 
         res.status(200).json({
             success: true,
             message: "Logged in successfully",
-            user:{
+            user: {
                 ...user._doc,
                 password: undefined,
             },
         });
-
-        
-    }catch(error){
+    } catch (error) {
         console.error("Error logging in:", error);
         res.status(400).json({ success: false, message: "Something went wrong. Please try again later." });
     }
 };
+
 
 export const logout = async (req, res) => {
     res.clearCookie("token");
