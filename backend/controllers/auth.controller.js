@@ -18,8 +18,6 @@ export const signup = async (req, res) => {
         if (!email || !password || !name || !role || !gender) {
             throw new Error("All fields are required");
         }
-
-        // Normalize gender input
         const normalizedGender = gender.toLowerCase();
         if (!['male', 'female'].includes(normalizedGender)) {
             throw new Error("Gender must be either 'male' or 'female'");
